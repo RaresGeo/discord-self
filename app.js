@@ -4,7 +4,7 @@ require('dotenv').config()
 
 const global = require('./global.js')
 const config = global.getConfig()
-var trusted
+const trusted = require('./db/trust.json')
 
 const Discord = require('discord.js-self')
 const client = new Discord.Client()
@@ -43,7 +43,7 @@ function removeCommand(module) {
 
 
 client.on('ready', () => {
-    trusted = require('./db/trust.json')
+
 
     let _cmds = require('fs').readdirSync('./commands')
     for (let i = 0; i < _cmds.length; i++) {

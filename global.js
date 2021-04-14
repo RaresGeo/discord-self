@@ -41,8 +41,6 @@ mongoPull = async(collection, query) => {
 }
 
 const dbList = [
-    'balance',
-    'gamble',
     'flipoff',
     'parrot',
     'trust'
