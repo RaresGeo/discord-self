@@ -4,7 +4,6 @@ require('dotenv').config()
 
 const global = require('./global.js')
 const config = global.getConfig()
-const trusted = require('./db/trust.json')
 
 const Discord = require('discord.js-self')
 const client = new Discord.Client()
@@ -62,7 +61,7 @@ client.on("message", async message => {
     })
 
     // Handle actual commands
-    if (message.author.id === config.uid || trusted.users.includes(message.author.id)) { // Check if bot or trusted
+    if (message.author.id === config.uid || global.getTrusted().users.includes(message.author.id)) { // Check if bot or trusted
         if (message.content.startsWith(config.prefix)) { // Starts with prefix
             //var trusted = global.getTrusted()
             let split = message.content.toLowerCase().split(/\s+/)

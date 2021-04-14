@@ -67,6 +67,20 @@ module.exports.getConfig = () => {
     return config
 }
 
+module.exports.getTrusted = () => {
+    try {
+        let json = jsonfile.readFileSync('./db/trust.json')
+        return json
+    } catch (error) {
+        console.log(error)
+        let json = {
+            "users": []
+        }
+        json.users.push(process.env.uid)
+        return json
+    }
+}
+
 const config = module.exports.getConfig()
 
 module.exports.sendDelete = async(message, string, time) => {
