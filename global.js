@@ -1,17 +1,72 @@
 const Discord = require('discord.js-self');
+const jsonfile = require('jsonfile')
+
+require('dotenv').config()
+const { MongoClient } = require('mongodb')
+
+const uri = process.env.uri
+const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+
+var collection
+
+client.connect()
+    .then(client => {
+        collection = client.db('discord').collection('commands')
+        mongoPullAll()
+    })
+
+mongoAddUser = async(query, newUser) => {
+    collection.findOneAndUpdate(query, { $push: { "users": newUser } })
+}
+
+mongoRemoveUser = async(query, user) => {
+    collection.findOneAndUpdate(query, { $pull: { "users": user } })
+}
+
+mongoRemoveAll = async(query) => {
+    collection.findOneAndUpdate(query, { $set: { "users": [] } })
+}
+
+mongoPull = async(collection, query) => {
+    const result = await collection.findOne(query)
+
+    if (result) {
+        return result
+    } else {
+        console.log(`Empty.`);
+    }
+}
+
+const dbList = [
+    'balance',
+    'gamble',
+    'flipoff',
+    'parrot',
+    'trust'
+]
+
+mongoPullAll = async() => {
+    for (let db of dbList) {
+        let json = await mongoPull(collection, { name: db })
+        jsonfile.writeFileSync(`./db/${db}.json`, json, { spaces: 2 })
+    }
+}
+
+module.exports.mongoInsertOne = async(document, newValue) => {
+    collection.findOneAndUpdate({ name: document }, { $set: { "users": newValue } })
+}
 
 module.exports.getConfig = () => {
-    try {
-        return require('./config.json')
-    } catch {
-        // This is just so I can deploy on heroku, use their config variables instead of a json file
-        let config = {}
-        config['prefix'] = process.env.prefix
-        config['token'] = process.env.token
-        config['uid'] = process.env.uid
-        config['messageLife'] = process.env.messageLife
-        return config
-    }
+    // This is just so I can deploy on heroku, use their config variables instead of a json file
+    let config = {}
+    config['prefix'] = process.env.prefix
+    config['token'] = process.env.token
+    config['uid'] = process.env.uid
+    config['messageLife'] = process.env.messageLife
+    return config
 }
 
 const config = module.exports.getConfig()
@@ -130,6 +185,7 @@ module.exports.manageList = (message, commandArgs, list, listName) => {
 
             module.exports.editDelete(message, string, config.messageLife * 1000)
             list = []
+            mongoRemoveAll({ name: listName })
         } else {
             commandArgs._.forEach(user => {
                 let string = ''
@@ -138,6 +194,7 @@ module.exports.manageList = (message, commandArgs, list, listName) => {
                     if (list.includes(user)) {
                         let index = list.indexOf(user)
                         list.splice(index, 1)
+                        mongoRemoveUser({ name: listName }, user)
                         string += `Removed <@${user}> from the ${listName} list`
                     } else {
                         string += `<@${user}> is not in the list\n`
@@ -157,6 +214,7 @@ module.exports.manageList = (message, commandArgs, list, listName) => {
                 if (user.length == 18) { // Snowflakes are 18 characters long. If these are not, they're invalid
                     if (!list.includes(user)) {
                         list.push(user)
+                        mongoAddUser({ name: listName }, user)
                         string += `Added <@${user}> to the ${listName} list\n`
                     } else {
                         string += `<@${user}> is already in the list\n`

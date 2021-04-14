@@ -2,3 +2,5 @@ node_modules/
 temp/*
 config.json
 test.js
+.env
+db/*

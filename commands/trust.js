@@ -1,7 +1,7 @@
 'use strict'
 
 const global = require('../global.js')
-let jsonfile = require('jsonfile')
+const jsonfile = require('jsonfile')
 const list = require('../db/trust.json')
 
 module.exports = {

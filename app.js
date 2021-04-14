@@ -4,12 +4,7 @@ require('dotenv').config()
 
 const global = require('./global.js')
 const config = global.getConfig()
-
-const gambleConfig = require('./db/gamble.json')
-const trusted = require('./db/trust.json')
-const argv = global.parseArgs(process.argv.slice(2))
-
-let jsonfile = require('jsonfile')
+var trusted
 
 const Discord = require('discord.js-self')
 const client = new Discord.Client()
@@ -45,20 +40,17 @@ function removeCommand(module) {
     }
 }
 
-let _cmds = require('fs').readdirSync('./commands')
-for (let i = 0; i < _cmds.length; i++) {
-    let cmd = require(`./commands/${_cmds[i]}`)
-    registerCommand(cmd)
-}
+
 
 client.on('ready', () => {
-    let gambleJSON = gambleConfig
+    trusted = require('./db/trust.json')
 
-    if (argv.d) {
-        gambleJSON['channel'] = gambleJSON['testingChannel']
-    } else gambleJSON['channel'] = gambleJSON['cazinoChannel']
+    let _cmds = require('fs').readdirSync('./commands')
+    for (let i = 0; i < _cmds.length; i++) {
+        let cmd = require(`./commands/${_cmds[i]}`)
+        registerCommand(cmd)
+    }
 
-    jsonfile.writeFileSync('../gamble.json', gambleJSON, { spaces: 2 })
     console.log('Logged in as ' + client.user.tag + ' successfully.')
 })
 
@@ -72,6 +64,7 @@ client.on("message", async message => {
     // Handle actual commands
     if (message.author.id === config.uid || trusted.users.includes(message.author.id)) { // Check if bot or trusted
         if (message.content.startsWith(config.prefix)) { // Starts with prefix
+            //var trusted = global.getTrusted()
             let split = message.content.toLowerCase().split(/\s+/)
             let command
                 // Get actual command

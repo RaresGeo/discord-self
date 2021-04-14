@@ -2,7 +2,7 @@
 
 const global = require('../global.js')
 const config = global.getConfig()
-const list = require('../db/middle.json')
+const list = require('../db/flipoff.json')
 let jsonfile = require('jsonfile')
 
 module.exports = {
@@ -28,5 +28,5 @@ module.exports.command = async(message, commandArgs) => {
 
     let json = list
     json['users'] = users
-    jsonfile.writeFileSync('./db/middle.json', json, { spaces: 2 })
+    jsonfile.writeFileSync('./db/flipoff.json', json, { spaces: 2 })
 }
