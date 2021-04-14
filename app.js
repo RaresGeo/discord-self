@@ -42,8 +42,6 @@ function removeCommand(module) {
 
 
 client.on('ready', () => {
-
-
     let _cmds = require('fs').readdirSync('./commands')
     for (let i = 0; i < _cmds.length; i++) {
         let cmd = require(`./commands/${_cmds[i]}`)

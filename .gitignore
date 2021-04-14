@@ -3,4 +3,3 @@ temp/*
 config.json
 test.js
 .env
-db/*
