@@ -29,14 +29,14 @@ module.exports.func = async(message, channel) => {
 
 module.exports.command = async(message, commandArgs) => {
     if (commandArgs.u) {
-        let users = global.manageList(message, commandArgs, list.users, module.exports.aliases[0])
+        let users = global.manageList(message, commandArgs, list.users, module.exports.aliases[0], 'users')
         let json = list
 
         json['users'] = users
         jsonfile.writeFileSync('./db/delete.json', json, { spaces: 2 })
     }
     if (commandArgs.s) {
-        let servers = global.manageList(message, commandArgs, list.servers, module.exports.aliases[0])
+        let servers = global.manageList(message, commandArgs, list.servers, module.exports.aliases[0], 'servers')
         let json = list
 
         json['servers'] = servers

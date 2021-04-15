@@ -18,16 +18,28 @@ client.connect()
         mongoPullAll()
     })
 
-mongoAddUser = async(query, newUser) => {
-    collection.findOneAndUpdate(query, { $push: { "users": newUser } })
+mongoAddUser = (query, newUser, field) => {
+    collection.findOneAndUpdate(query, {
+        $push: {
+            [field]: newUser
+        }
+    })
 }
 
-mongoRemoveUser = async(query, user) => {
-    collection.findOneAndUpdate(query, { $pull: { "users": user } })
+mongoRemoveUser = (query, user, field) => {
+    collection.findOneAndUpdate(query, {
+        $pull: {
+            [field]: user
+        }
+    })
 }
 
-mongoRemoveAll = async(query) => {
-    collection.findOneAndUpdate(query, { $set: { "users": [] } })
+mongoRemoveAll = (query, field) => {
+    collection.findOneAndUpdate(query, {
+        $set: {
+            [field]: []
+        }
+    })
 }
 
 mongoPull = async(collection, query) => {
@@ -187,7 +199,7 @@ getUserList = async(message, list) => {
     return users
 }
 
-module.exports.manageList = (message, commandArgs, list, listName) => {
+module.exports.manageList = (message, commandArgs, list, listName, field = 'users') => {
 
     if (commandArgs.r) {
         // Remove all ids in commandArgs._ if -r
@@ -200,7 +212,7 @@ module.exports.manageList = (message, commandArgs, list, listName) => {
 
             module.exports.editDelete(message, string, config.messageLife * 1000)
             list = []
-            mongoRemoveAll({ name: listName })
+            mongoRemoveAll({ name: listName }, field)
         } else {
             commandArgs._.forEach(user => {
                 let string = ''
@@ -209,7 +221,7 @@ module.exports.manageList = (message, commandArgs, list, listName) => {
                     if (list.includes(user)) {
                         let index = list.indexOf(user)
                         list.splice(index, 1)
-                        mongoRemoveUser({ name: listName }, user)
+                        mongoRemoveUser({ name: listName }, user, field)
                         string += `Removed <@${user}> from the ${listName} list`
                     } else {
                         string += `<@${user}> is not in the list\n`
@@ -229,7 +241,7 @@ module.exports.manageList = (message, commandArgs, list, listName) => {
                 if (user.length == 18) { // Snowflakes are 18 characters long. If these are not, they're invalid
                     if (!list.includes(user)) {
                         list.push(user)
-                        mongoAddUser({ name: listName }, user)
+                        mongoAddUser({ name: listName }, user, field)
                         string += `Added <@${user}> to the ${listName} list\n`
                     } else {
                         string += `<@${user}> is already in the list\n`
