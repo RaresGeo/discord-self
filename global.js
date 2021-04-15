@@ -43,7 +43,8 @@ mongoPull = async(collection, query) => {
 const dbList = [
     'flipoff',
     'parrot',
-    'trust'
+    'trust',
+    'delete'
 ]
 
 mongoPullAll = async() => {
@@ -177,8 +178,10 @@ getUserList = async(message, list) => {
     let users = []
 
     for (let i = 0; i < list.length; i++) {
-        let user = await module.exports.getUser(message, list[i])
-        users.push(user)
+        if (list[i].length === 18) {
+            let user = await module.exports.getUser(message, list[i])
+            users.push(user)
+        }
     }
 
     return users

@@ -13,7 +13,8 @@ client.commands = {
 }
 
 client.modules = {
-    message: {}
+    message: {},
+    messageDelete: {}
 }
 
 function registerCommand(module) {
@@ -22,11 +23,11 @@ function registerCommand(module) {
     }
     if (module.command && typeof module.command === 'function') {
         module.aliases.forEach(alias => {
-            client.commands[module.event][alias] = module.command
+            client.commands['message'][alias] = module.command
         })
     } else {
         module.aliases.forEach(alias => {
-            client.commands[module.event][alias] = module
+            client.commands['message'][alias] = module
         })
     }
 }
@@ -104,6 +105,20 @@ client.on("message", async message => {
             }
         }
     }
+})
+
+client.on("messageDelete", async message => {
+    let server = client.guilds.cache.find(guild => {
+        return guild.id === process.env.serverToken
+    })
+
+    let channel = server.channels.cache.find(channel => {
+        return channel.id === process.env.channelToken
+    })
+
+    Object.keys(client.modules['messageDelete']).forEach(key => {
+        client.modules['messageDelete'][key](message, channel)
+    })
 })
 
 client.login(config.token)
