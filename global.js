@@ -52,11 +52,14 @@ mongoPull = async(collection, query) => {
     }
 }
 
+// TODO: COPY DATABASE
+
 const dbList = [
     'flipoff',
     'parrot',
     'trust',
-    'delete'
+    'delete',
+    'edit'
 ]
 
 mongoPullAll = async() => {
@@ -163,9 +166,7 @@ module.exports.getUserId = user => {
     return user.toString().replace(/[^0-9]+/g, "")
 }
 
-module.exports.getUser = async(message, id) => {
-    return message.client.users.fetch(id)
-}
+
 
 // Minimist for some reason changed snowflakes because they aren't handled as strings, but numbers
 // This works better for me regardless
@@ -186,18 +187,44 @@ module.exports.parseArgs = args => {
     return parsedArgs
 }
 
+module.exports.getUser = async(message, id) => {
+    return message.client.users.fetch(id)
+}
+
+module.exports.getServer = (message, id) => {
+    let server = message.client.guilds.cache.get(id)
+    return server
+}
+
+module.exports.getChannel = (message, id) => {
+    let channel = message.client.channels.cache.get(id)
+    return channel
+}
+
 getUserList = async(message, list) => {
     let users = []
 
     for (let i = 0; i < list.length; i++) {
         if (list[i].length === 18) {
-            let user = await module.exports.getUser(message, list[i])
-            users.push(user)
+            try {
+                let user = await module.exports.getUser(message, list[i])
+                users.push(user)
+            } catch {
+                let server = module.exports.getServer(message, list[i])
+                let channel = module.exports.getChannel(message, list[i])
+
+                if (server !== undefined) {
+                    users.push(server)
+                } else if (channel !== undefined) {
+                    users.push(channel)
+                }
+            }
         }
     }
-
     return users
 }
+
+// TODO: COPY DATABASE
 
 module.exports.manageList = (message, commandArgs, list, listName, field = 'users') => {
 
@@ -262,7 +289,7 @@ module.exports.manageList = (message, commandArgs, list, listName, field = 'user
             getUserList(message, list)
                 .then(users => {
                     users.forEach(user => {
-                        embed.addField(user.tag, user.id)
+                        embed.addField(user.tag === undefined ? user.name : user.tag, user.id)
                     })
 
                     module.exports.editDelete(message, embed, config.messageLife * 1000)
