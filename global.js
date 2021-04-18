@@ -231,71 +231,71 @@ module.exports.manageList = (message, commandArgs, list, listName, field = 'user
     if (commandArgs.r) {
         // Remove all ids in commandArgs._ if -r
         if (commandArgs._.includes('all')) { // Just remove everything if commandArgs._ contains 'all'
-            let string = ''
-
-            list.forEach(user => {
-                string += `Removed <@${user}> from the ${listName} list\n`
-            })
-
-            module.exports.editDelete(message, string, config.messageLife * 1000)
-            list = []
-            mongoRemoveAll({ name: listName }, field)
-        } else {
-            commandArgs._.forEach(user => {
-                let string = ''
-                user = module.exports.getUserId(user)
-                if (user.length == 18) { // Snowflakes are 18 characters long. If these are not, they're invalid
-                    if (list.includes(user)) {
-                        let index = list.indexOf(user)
-                        list.splice(index, 1)
-                        mongoRemoveUser({ name: listName }, user, field)
-                        string += `Removed <@${user}> from the ${listName} list`
-                    } else {
-                        string += `<@${user}> is not in the list\n`
-                    }
-                } else {
-                    string += `${user} is invalid user id\n`
-                }
-                module.exports.editDelete(message, string, config.messageLife * 1000)
-            })
-        }
-    } else {
-        if (commandArgs._.length) {
-            // Add all _
-            let string = ''
-            commandArgs._.forEach(user => {
-                user = module.exports.getUserId(user)
-                if (user.length == 18) { // Snowflakes are 18 characters long. If these are not, they're invalid
-                    if (!list.includes(user)) {
-                        list.push(user)
-                        mongoAddUser({ name: listName }, user, field)
-                        string += `Added <@${user}> to the ${listName} list\n`
-                    } else {
-                        string += `<@${user}> is already in the list\n`
-                    }
-                } else {
-                    string += `${user} is invalid user id\n`
-                }
-            })
-            module.exports.editDelete(message, string, config.messageLife * 1000)
-        } else {
-
-            let embed = new Discord.MessageEmbed()
-                .setColor('RANDOM')
-                .setTitle(`Users in ${listName} list`)
-                .setTimestamp()
-                .setFooter(`${listName}`, message.client.user.avatarURL())
+            let string = '_ _\n'
 
             getUserList(message, list)
                 .then(users => {
                     users.forEach(user => {
-                        embed.addField(user.tag === undefined ? user.name : user.tag, user.id)
+                        string += `Removed ${user.tag === undefined ? user.name : user.tag} from the ${listName}, ${field} list\n`
                     })
+                    module.exports.editDelete(message, string, config.messageLife * 1000)
+                })
+                .catch(console.error)
 
-                    module.exports.editDelete(message, embed, config.messageLife * 1000)
+            list = []
+            mongoRemoveAll({ name: listName }, field)
+        } else {
+            let string = '_ _\n'
+            getUserList(message, commandArgs._)
+                .then(users => {
+                    users.forEach(user => {
+                        if (list.includes(user.id)) {
+                            let index = list.indexOf(user.id)
+                            list.splice(index, 1)
+                            mongoRemoveUser({ name: listName }, user.id, field)
+                            string += `Removed ${user.tag === undefined ? user.name : user.tag} from the ${listName}, ${field} list\n`
+                        } else {
+                            string += `${user.tag === undefined ? user.name : user.tag} is not in the list\n`
+                        }
+                    })
+                    module.exports.editDelete(message, string, config.messageLife * 1000)
                 })
                 .catch(console.error)
         }
+    } else if (commandArgs._.length) {
+        let string = '_ _\n'
+        getUserList(message, commandArgs._)
+            .then(users => {
+                users.forEach(user => {
+                    if (!list.includes(user.id)) {
+                        list.push(user.id)
+                        mongoAddUser({ name: listName }, user.id, field)
+                        string += `Added ${user.tag === undefined ? user.name : user.tag} to the ${listName}, ${field} list\n`
+                    } else {
+                        string += `${user.tag === undefined ? user.name : user.tag} is already in the list\n`
+                    }
+                })
+                module.exports.editDelete(message, string, config.messageLife * 1000)
+            })
+            .catch(console.error)
+    } else {
+
+        let embed = new Discord.MessageEmbed()
+            .setColor('RANDOM')
+            .setTitle(`Users in ${listName}, ${field} list`)
+            .setTimestamp()
+            .setFooter(`${listName}`, message.client.user.avatarURL())
+
+        getUserList(message, list)
+            .then(users => {
+                users.forEach(user => {
+                    embed.addField(user.tag === undefined ? user.name : user.tag, user.id)
+                })
+
+                module.exports.editDelete(message, embed, config.messageLife * 1000)
+            })
+            .catch(console.error)
+
     }
 
     return list

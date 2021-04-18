@@ -11,10 +11,21 @@ module.exports = {
     event: 'messageUpdate'
 }
 
-module.exports.func = async(oldMessage, newMessage, channel) => {
-    if (list.users.includes(newMessage.author.id) ||
-        list.users.includes(newMessage.channel.guild.id) ||
-        list.users.includes(newMessage.channel.id)) {
+const checkDatabase = (message, list) => {
+    if (list.includes(message.author.id) ||
+        list.includes(message.channel.guild.id) ||
+        list.includes(message.channel.id)) {
+        return true
+    }
+    return false
+}
+
+module.exports.func = async(oldMessage, newMessage) => {
+    if (oldMessage.content === newMessage.content) {
+        return
+    }
+
+    if (checkDatabase(newMessage, list.users) && !checkDatabase(newMessage, list.blacklisted)) {
         let embed = new Discord.MessageEmbed()
             .setColor('RANDOM')
             .setTitle(`Message edited by ${newMessage.author.tag}`)
@@ -25,15 +36,35 @@ module.exports.func = async(oldMessage, newMessage, channel) => {
             .addField('New message:', newMessage.content)
             .setTimestamp()
             .setThumbnail(newMessage.author.avatarURL())
-            .setFooter(`${newMessage.author.id}`, newMessage.client.user.avatarURL())
-        channel.send(embed)
+            .setFooter(`${newMessage.author.id}`, newMessage.channel.guild.iconURL())
+
+        list.channels.forEach(id => {
+            let channel = global.getChannel(newMessage, id)
+            if (channel === undefined) {
+                return
+            }
+            try {
+                channel.send(embed)
+            } catch (error) {
+                console.log(error)
+            }
+        })
     }
 }
 
 module.exports.command = async(message, commandArgs) => {
-    let users = global.manageList(message, commandArgs, list.users, module.exports.aliases[0])
     let json = list
 
-    json['users'] = users
+    if (commandArgs.b || commandArgs.blacklist) {
+        let blacklisted = global.manageList(message, commandArgs, list.blacklisted, module.exports.aliases[0], 'blacklisted')
+        json['blacklisted'] = blacklisted
+    } else if (commandArgs.c || commandArgs.channel) {
+        let channels = global.manageList(message, commandArgs, list.channels, module.exports.aliases[0], 'channels')
+        json['channels'] = channels
+    } else {
+        let users = global.manageList(message, commandArgs, list.users, module.exports.aliases[0])
+        json['users'] = users
+    }
+
     jsonfile.writeFileSync('./db/edit.json', json, { spaces: 2 })
 }

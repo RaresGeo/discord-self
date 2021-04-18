@@ -54,14 +54,6 @@ client.on('ready', () => {
     }
 
     console.log('Logged in as ' + client.user.tag + ' successfully.')
-
-    server = client.guilds.cache.find(guild => {
-        return guild.id === process.env.serverToken
-    })
-
-    channel = server.channels.cache.find(channel => {
-        return channel.id === process.env.channelToken
-    })
 })
 
 // Handle all commands
@@ -121,13 +113,13 @@ client.on("message", async message => {
 
 client.on("messageDelete", async message => {
     Object.keys(client.modules['messageDelete']).forEach(key => {
-        client.modules['messageDelete'][key](message, channel)
+        client.modules['messageDelete'][key](message)
     })
 })
 
 client.on("messageUpdate", async(oldMessage, newMessage) => {
     Object.keys(client.modules['messageUpdate']).forEach(key => {
-        client.modules['messageUpdate'][key](oldMessage, newMessage, channel)
+        client.modules['messageUpdate'][key](oldMessage, newMessage)
     })
 })
 
