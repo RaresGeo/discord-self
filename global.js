@@ -18,6 +18,14 @@ client.connect()
         mongoPullAll()
     })
 
+mongoChangeField = (query, newValue, field) => {
+    collection.findOneAndUpdate(query, {
+        $set: {
+            [field]: newValue
+        }
+    })
+}
+
 mongoAddUser = (query, newUser, field) => {
     collection.findOneAndUpdate(query, {
         $push: {
@@ -225,7 +233,15 @@ getUserList = async(message, list) => {
     return users
 }
 
-// TODO: COPY DATABASE
+module.exports.updateField = (message, commandArgs, list, listName, field) => {
+    if (commandArgs._.length) {
+        list[field] = commandArgs._[0]
+        mongoChangeField({ name: listName }, commandArgs._[0], field)
+        module.exports.editDelete(message, `Set ${field} value to ${list[field]}.`, config.messageLife * 1000)
+    } else {
+        module.exports.editDelete(message, `Current ${field} value is ${list[field]}.`, config.messageLife * 1000)
+    }
+}
 
 module.exports.manageList = (message, commandArgs, list, listName, field = 'users') => {
 

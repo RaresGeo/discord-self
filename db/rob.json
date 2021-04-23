@@ -1,7 +1,10 @@
 {
-    "_id": "608344564c6e2795867859e1",
-    "name": "rob",
-    "users": [],
-    "channels": [],
-    "threshold": 50000
+  "_id": "608344564c6e2795867859e1",
+  "name": "rob",
+  "users": [],
+  "channels": [
+    "830694941470228510"
+  ],
+  "threshold": "100000",
+  "blacklisted": []
 }

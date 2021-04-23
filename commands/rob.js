@@ -2,16 +2,16 @@
 
 const global = require('../global.js')
 const config = global.getConfig()
-const list = require('../db/rob.json')
 const robPrefix = ';'
 const Discord = require('discord.js-self')
 const jsonfile = require('jsonfile')
-
 
 module.exports = {
     aliases: ['rob', 'mug'],
     event: 'message'
 }
+
+const list = require(`../db/${module.exports.aliases[0]}.json`)
 
 module.exports.func = async message => {
     const author = message.author
@@ -36,10 +36,17 @@ module.exports.func = async message => {
             }
 
             let user = embedJSON.author.name
-            let value = embedJSON.description.replace(",", "").split(' ')[3]
+            let value = embedJSON.description.replace(",", "").split(' ')
+
+            if (value[1] !== "Withdrew") {
+                console.log("Not withdrew")
+                return
+            }
+
+            value = value[3]
 
             if (user === author.tag) {
-                if (value >= list.threshold) {
+                if (parseInt(value) >= parseInt(list.threshold)) {
                     // Rob his ass
                     let string = `${robPrefix}rob ${author.id}`
                     message.channel.send(string)
@@ -63,12 +70,14 @@ module.exports.command = async(message, commandArgs) => {
     let json = list
 
     if (commandArgs.c || commandArgs.channel) {
-        let channels = global.manageList(message, commandArgs, list.channels, module.exports.aliases[0], 'channels')
-        json['channels'] = channels
+        let blacklisted = global.manageList(message, commandArgs, list.channels, module.exports.aliases[0], 'channels')
+        json['blacklisted'] = blacklisted
+    } else if (commandArgs.t || commandArgs.v || commandArgs.threshold || commandArgs.value) {
+        global.updateField(message, commandArgs, list, module.exports.aliases[0], 'threshold')
     } else {
         let users = global.manageList(message, commandArgs, list.users, module.exports.aliases[0])
         json['users'] = users
     }
 
-    jsonfile.writeFileSync('./db/rob.json', json, { spaces: 2 })
+    jsonfile.writeFileSync(`./db/${module.exports.aliases[0]}.json`, json, { spaces: 2 })
 }
