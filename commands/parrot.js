@@ -19,6 +19,11 @@ module.exports.func = async message => {
         let parrotLine = message.content
         if (!parrotLine.length || parrotLine.startsWith(config.prefix)) return;
 
+        // Censor words in db
+        /*list.censoredWords.forEach(censoredWord => {
+            parrotLine = parrotLine.replace(censoredWord, '[REDACTED]')
+        })*/
+
         // Send the modified (or not) message
         // Edit it in to avoid pinging people
         message.channel.send(message, parrotLine)
