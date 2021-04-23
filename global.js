@@ -59,7 +59,8 @@ const dbList = [
     'parrot',
     'trust',
     'delete',
-    'edit'
+    'edit',
+    'rob'
 ]
 
 mongoPullAll = async() => {
