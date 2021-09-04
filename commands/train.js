@@ -33,7 +33,7 @@ module.exports.command = async(message, commandArgs) => {
         }
         let url = `https://bilete.cfrcalatori.ro/ro-RO/Itineraries?DepartureStationName=${commandArgs._[0].replace('-', '%20')}&ArrivalStationName=${commandArgs._[1].replace('-', '%20')}&MinutesInDay=0&DepartureDate=${date}`
 
-        global.editDelete(message, `Searching, please wait...\n<${url}>`, config.messageLife * 250)
+        global.edit(message, `Searching, please wait...\n<${url}>`)
 
         const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
         const page = await browser.newPage()

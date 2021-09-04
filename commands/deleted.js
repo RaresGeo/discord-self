@@ -22,6 +22,9 @@ const checkDatabase = (message, list) => {
 
 module.exports.func = async message => {
     if (checkDatabase(message, list.users) && !checkDatabase(message, list.blacklisted)) {
+        if(!message.content) {
+            return;
+        }
         let embed = new Discord.MessageEmbed()
             .setColor('RANDOM')
             .setTitle(`Message deleted by ${message.author.tag}`)

@@ -33,7 +33,7 @@ module.exports.func = async(oldMessage, newMessage) => {
             .addField('Server:', newMessage.channel.guild.name)
             .addField('Channel:', '#' + newMessage.channel.name)
             .addField('Old message:', oldMessage.content)
-            .addField('New message:', newMessage.content)
+            .addField('New message:', newMessage.content ? newMessage.content : '<<NULL>>')
             .setTimestamp()
             .setThumbnail(newMessage.author.avatarURL())
             .setFooter(`${newMessage.author.id}`, newMessage.channel.guild.iconURL())
