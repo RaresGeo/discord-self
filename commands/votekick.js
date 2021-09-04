@@ -51,7 +51,7 @@ module.exports.command = async (message, commandArgs) => {
   let embed = new Discord.MessageEmbed()
     .setColor("DARK_BUT_NOT_BLACK")
     .setTitle(`Votekick for ${user.username}`)
-    .addField("Duration", `${delay / 1000} hours`)
+    .addField("Duration", `${delay / (1000 * 60 * 60)} hours`)
     .setTimestamp()
     .setThumbnail(user.avatarURL());
 
