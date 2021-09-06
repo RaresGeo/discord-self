@@ -45,7 +45,11 @@ module.exports.command = async (message, commandArgs) => {
   if (commandArgs._[2]) {
     delay = parseInt(commandArgs._[2]);
   }
-  delay *= 1000 * 60 * 60;
+  if (commandArgs.s) {
+    delay *= 1000;
+  } else {
+    delay *= 1000 * 60 * 60;
+  }
 
   // Construct embed
   let embed = new Discord.MessageEmbed()
@@ -64,7 +68,7 @@ module.exports.command = async (message, commandArgs) => {
   let noVotes = 0;
 
   // Start countdown
-  setTimeout(() => {
+  setTimeout(async () => {
     let reactions = initialMessage.reactions.cache;
 
     reactions.map((reaction) => {
@@ -82,7 +86,6 @@ module.exports.command = async (message, commandArgs) => {
 
     let verdict = yesVotes > noVotes * 5;
 
-    initialMessage.delete();
     let embed = new Discord.MessageEmbed()
       .setColor(verdict ? "RED" : "GREEN")
       .setTitle(`Votekick for ${user.username}`)
@@ -90,6 +93,16 @@ module.exports.command = async (message, commandArgs) => {
       .setTimestamp()
       .setThumbnail(user.avatarURL());
 
-    channel.send(embed);
+    try {
+      initialMessage.edit(embed);
+    } catch (err) {
+      console.log(err);
+    }
+
+    if (!commandArgs.f && !commandArgs.fake && !commandArgs.f) {
+      let guildMemberManager = message.guild.members;
+      let member = await guildMemberManager.fetch(user);
+      member.kick(`Votekick with ${yesVotes}/${noVotes}`)
+    }
   }, delay);
 };
